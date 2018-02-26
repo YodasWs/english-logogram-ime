@@ -1,1 +1,10 @@
-{"name":"english-logogram-img","components":[],"sections":[],"modules":["ngRoute"],"pages":[]}
+{
+	"name":"english-logogram-img",
+	"components":[],
+	"sections":[],
+	"modules":["ngRoute"],
+	"pages":[],
+	"dict": [
+		"pronouns.json"
+	]
+}
