@@ -140,7 +140,7 @@ options = {
 	2, 'global'
 ],
 'indent': [
-	2, 'tab'
+	0, 'tab'
 ],
 'space-before-function-paren': 0,
 'comma-dangle': 0,
@@ -379,6 +379,17 @@ options = {
 						})
 					})
 				})
+
+				if (site.dict) {
+					requires += '\nlet dict = {}'
+					site.dict.forEach((file, i) => {
+						try {
+							fs.accessSync(`./src/dictionary/${file}`)
+							requires += `\nObject.assign(dict, require('../src/dictionary/${file}'))`
+						} catch (e) {}
+					})
+				}
+
 				return `const modules = ${JSON.stringify(site.modules)}${requires}`
 			},
 			options:{
