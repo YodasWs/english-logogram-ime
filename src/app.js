@@ -9,17 +9,19 @@ angular.module('EnglishLogogramIME', modules)
 		controller() {
 			angular.element('[ng-view]').attr('ng-view', 'pageHome')
 			let $list = $('#composition')
+			let list = []
 
 			function updateCompBox(word) {
-				$list.empty()
+				clearCompBox()
 				if (! word || typeof word !== 'string') return
 				dictStartWith(word.toLowerCase()).forEach((word) => {
 					$list.append(`<li>${word}`)
+					list.push(word)
 				})
 			}
 			function clearCompBox() {
 				$list.empty()
-				// TODO: Hide Composition Box
+				list = []
 			}
 
 			document.querySelectorAll('textarea').forEach((textarea) => {
@@ -40,11 +42,8 @@ angular.module('EnglishLogogramIME', modules)
 					switch (e.inputType) {
 					case 'insertText':
 						if (e.data.match(/\s/)) { // Whitespace
-							$list.empty()
 
 							if (composing.is) {
-
-								// TODO: Replace word
 								re = new RegExp(`([a-z']+)${e.data}$`, 'i')
 								end = re.exec(e.target.value)
 								if (Array.isArray(end)) {
@@ -56,6 +55,7 @@ angular.module('EnglishLogogramIME', modules)
 								}
 							}
 							composing.is = false
+							clearCompBox()
 
 						} else if (isLetter(e.data) || e.data === "'") {
 							// TODO: Open Composition Box if unopen
@@ -64,9 +64,17 @@ angular.module('EnglishLogogramIME', modules)
 							}
 							composing.is = true
 							updateCompBox(lastWord)
+
 						} else if (isNumeric(e.data)) {
 							if (composing.is) {
-								// TODO: Replace Text with Selected Composition Box Entry
+								// Replace Text with Selected Composition Box Entry
+								const num = Number.parseInt(e.data, 10) - 1
+								re = new RegExp(`([a-z']+)${e.data}$`, 'i')
+								end = re.exec(e.target.value)
+								if (Array.isArray(end) && list[num]) {
+									e.target.value = e.target.value.replace(re, `${list[num]}`)
+									clearCompBox()
+								}
 							}
 						}
 						break;
@@ -81,7 +89,7 @@ angular.module('EnglishLogogramIME', modules)
 						if (composing.is) {
 							if (e.target.value.length <= composing.start) {
 								composing.is = false
-								$list.empty()
+								clearCompBox()
 							} else {
 								updateCompBox(lastWord)
 							}
