@@ -5,6 +5,7 @@
 # Build directories
 bundle
 build
+docs/dictionary/
 
 # Logs
 logs

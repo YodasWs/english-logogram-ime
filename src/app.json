@@ -5,6 +5,7 @@
 	"modules":["ngRoute"],
 	"pages":[],
 	"dict": [
-		"pronouns.json"
+		"pronouns.json",
+		"kyoiku-kanji-1.json"
 	]
 }

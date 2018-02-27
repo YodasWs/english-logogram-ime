@@ -17,6 +17,10 @@ angular.module('EnglishLogogramIME', modules)
 					$list.append(`<li>${word}`)
 				})
 			}
+			function clearCompBox() {
+				$list.empty()
+				// TODO: Hide Composition Box
+			}
 
 			document.querySelectorAll('textarea').forEach((textarea) => {
 				let composing = {
@@ -42,16 +46,12 @@ angular.module('EnglishLogogramIME', modules)
 
 								// TODO: Replace word
 								re = new RegExp(`([a-z']+)${e.data}$`, 'i')
-									console.log('re:', re)
 								end = re.exec(e.target.value)
-									console.log(`'${e.target.value}'`)
-									console.log('end:', end)
 								if (Array.isArray(end)) {
 									lastWord = end[1].toLowerCase()
-									console.log(lastWord)
 									if (dict[lastWord]) {
-										console.log('dict:', dict[lastWord])
-										e.target.value = e.target.value.replace(re, `${dict[lastWord]}${e.data}`)
+										const word = Array.isArray(dict[lastWord]) ? dict[lastWord][0] : dict[lastWord]
+										e.target.value = e.target.value.replace(re, `${word}${e.data}`)
 									}
 								}
 							}
@@ -59,23 +59,28 @@ angular.module('EnglishLogogramIME', modules)
 
 						} else if (isLetter(e.data) || e.data === "'") {
 							// TODO: Open Composition Box if unopen
-							// TODO: Update Composition Box
 							if (!composing.is) {
 								composing.start = end.index
 							}
 							composing.is = true
 							updateCompBox(lastWord)
 						} else if (isNumeric(e.data)) {
+							if (composing.is) {
+								// TODO: Replace Text with Selected Composition Box Entry
+							}
 						}
 						break;
 
 					case 'insertLineBreak':
+						clearCompBox()
+						if (composing.is) e.target.value = e.target.value.replace(/\r?\n$/, '')
 						composing.is = false
 						break;
 
 					case 'deleteContentBackward':
 						if (composing.is) {
 							if (e.target.value.length <= composing.start) {
+								composing.is = false
 								$list.empty()
 							} else {
 								updateCompBox(lastWord)
@@ -107,7 +112,10 @@ function dictStartWith(word) {
 	word = word.toLowerCase()
 	let list = []
 	for (let i in dict) {
-		if (i.startsWith(word)) list.push(dict[i])
+		if (i.startsWith(word)) {
+			if (typeof dict[i] === 'string') list.push(dict[i])
+			if (Array.isArray(dict[i])) list = list.concat(dict[i])
+		}
 	}
 	return list.unique()
 }
