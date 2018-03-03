@@ -33,8 +33,19 @@ angular.module('EnglishLogogramIME', modules)
 				textarea.addEventListener('input', (e) => {
 					if (e.isComposing) composing.is = e.isComposing
 
+					const txtarea = e.target
+
+					let strSearch = txtarea.value
+					let replacement = null
+
+					if (txtarea.selectionStart === txtarea.selectionEnd) {
+						strSearch = strSearch.substr(0, txtarea.selectionEnd)
+					} else {
+						strSearch = strSearch.substr(txtarea.selectionStart, txtarea.selectionEnd)
+					}
+
 					let re = /\b[a-z']+$/i, lastWord
-					let end = re.exec(e.target.value)
+					let end = re.exec(strSearch)
 					if (Array.isArray(end)) {
 						lastWord = end[0].toLowerCase()
 					}
@@ -45,12 +56,12 @@ angular.module('EnglishLogogramIME', modules)
 
 							if (composing.is) {
 								re = new RegExp(`([a-z']+)${e.data}$`, 'i')
-								end = re.exec(e.target.value)
+								end = re.exec(strSearch)
 								if (Array.isArray(end)) {
 									lastWord = end[1].toLowerCase()
 									if (dict[lastWord] || list.length === 1) {
 										const word = list.length === 1 ? list[0] : Array.isArray(dict[lastWord]) ? dict[lastWord][0] : dict[lastWord]
-										e.target.value = e.target.value.replace(re, `${word}${e.data}`)
+										replacement = strSearch.replace(re, `${word}${e.data}`)
 									}
 								}
 							}
@@ -70,9 +81,9 @@ angular.module('EnglishLogogramIME', modules)
 								// Replace Text with Selected Composition Box Entry
 								const num = Number.parseInt(e.data, 10) - 1
 								re = new RegExp(`([a-z']+)${e.data}$`, 'i')
-								end = re.exec(e.target.value)
+								end = re.exec(strSearch)
 								if (Array.isArray(end) && list[num]) {
-									e.target.value = e.target.value.replace(re, `${list[num]} `)
+									replacement = strSearch.replace(re, `${list[num]} `)
 									clearCompBox()
 								}
 							}
@@ -81,13 +92,13 @@ angular.module('EnglishLogogramIME', modules)
 
 					case 'insertLineBreak':
 						clearCompBox()
-						if (composing.is) e.target.value = e.target.value.replace(/\r?\n$/, '')
+						if (composing.is) replacement = strSearch.replace(/\r?\n$/, '')
 						composing.is = false
 						break;
 
 					case 'deleteContentBackward':
 						if (composing.is) {
-							if (e.target.value.length <= composing.start) {
+							if (strSearch.length <= composing.start) {
 								composing.is = false
 								clearCompBox()
 							} else {
@@ -98,6 +109,11 @@ angular.module('EnglishLogogramIME', modules)
 
 					default:
 						console.log(e)
+					}
+
+					if (replacement) {
+						txtarea.value = txtarea.value.substr(0, composing.start) + replacement + txtarea.value.substr(txtarea.selectionEnd)
+						txtarea.setSelectionRange(composing.start + replacement.length, composing.start + replacement.length)
 					}
 
 				}, false)
