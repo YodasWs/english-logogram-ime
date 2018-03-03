@@ -48,8 +48,8 @@ angular.module('EnglishLogogramIME', modules)
 								end = re.exec(e.target.value)
 								if (Array.isArray(end)) {
 									lastWord = end[1].toLowerCase()
-									if (dict[lastWord]) {
-										const word = Array.isArray(dict[lastWord]) ? dict[lastWord][0] : dict[lastWord]
+									if (dict[lastWord] || list.length === 1) {
+										const word = list.length === 1 ? list[0] : Array.isArray(dict[lastWord]) ? dict[lastWord][0] : dict[lastWord]
 										e.target.value = e.target.value.replace(re, `${word}${e.data}`)
 									}
 								}
@@ -72,7 +72,7 @@ angular.module('EnglishLogogramIME', modules)
 								re = new RegExp(`([a-z']+)${e.data}$`, 'i')
 								end = re.exec(e.target.value)
 								if (Array.isArray(end) && list[num]) {
-									e.target.value = e.target.value.replace(re, `${list[num]}`)
+									e.target.value = e.target.value.replace(re, `${list[num]} `)
 									clearCompBox()
 								}
 							}
