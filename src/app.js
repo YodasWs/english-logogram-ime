@@ -61,7 +61,7 @@ angular.module('EnglishLogogramIME', modules)
 									lastWord = end[1].toLowerCase()
 									if (dict[lastWord] || list.length === 1) {
 										const word = list.length === 1 ? list[0] : Array.isArray(dict[lastWord]) ? dict[lastWord][0] : dict[lastWord]
-										replacement = strSearch.replace(re, `${word}${e.data}`)
+										replacement = `${word}${e.data}`
 									}
 								}
 							}
@@ -83,7 +83,8 @@ angular.module('EnglishLogogramIME', modules)
 								re = new RegExp(`([a-z']+)${e.data}$`, 'i')
 								end = re.exec(strSearch)
 								if (Array.isArray(end) && list[num]) {
-									replacement = strSearch.replace(re, `${list[num]} `)
+									replacement = `${list[num]} `
+									composing.is = false
 									clearCompBox()
 								}
 							}
@@ -91,9 +92,8 @@ angular.module('EnglishLogogramIME', modules)
 						break;
 
 					case 'insertLineBreak':
-						clearCompBox()
-						if (composing.is) replacement = strSearch.replace(/\r?\n$/, '')
 						composing.is = false
+						clearCompBox()
 						break;
 
 					case 'deleteContentBackward':
@@ -111,7 +111,7 @@ angular.module('EnglishLogogramIME', modules)
 						console.log(e)
 					}
 
-					if (replacement) {
+					if (typeof replacement === 'string') {
 						txtarea.value = txtarea.value.substr(0, composing.start) + replacement + txtarea.value.substr(txtarea.selectionEnd)
 						txtarea.setSelectionRange(composing.start + replacement.length, composing.start + replacement.length)
 					}
