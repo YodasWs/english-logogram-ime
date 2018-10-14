@@ -351,7 +351,7 @@ options = {
 			pattern:/\/\* app\.json \*\//,
 			replacement:()=>{
 				// Read app.json to build site!
-				let site = require('./src/app.json')
+				const site = require('./src/app.json')
 				if (!site.modules) site.modules = ['ngRoute']
 				let requires = ''
 				;[
@@ -651,7 +651,7 @@ angular.module('${argv.module}')
 		},
 		// TODO: Add to app.json
 		() => {
-			let site = require('./src/app.json')
+			const site = require('./src/app.json')
 			if (!site.pages) site.pages = []
 			site.pages.push({
 				path: `${argv.sectionCC}${argv.nameCC}`,
@@ -700,7 +700,7 @@ angular.module('${argv.module}')
 		},
 		// TODO: Add to app.json
 		() => {
-			let site = require('./src/app.json')
+			const site = require('./src/app.json')
 			if (!site.components) site.components = []
 			site.components.push({
 				path: `${argv.sectionCC}${argv.name}`,
