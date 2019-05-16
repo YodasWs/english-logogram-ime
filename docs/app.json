@@ -6,6 +6,7 @@
 	"pages":[],
 	"dict": [
 		"pronouns.json",
-		"kyoiku-kanji-1.json"
+		"kyoiku-kanji-1.json",
+		"kyoiku-kanji-2.json"
 	]
 }
