@@ -31,10 +31,7 @@ function onReady(fn) {
 
 onReady(() => {
 	$list = document.querySelector('#composition');
-	console.log('Sam, DOM ready :)');
-	const boxes = [...document.querySelectorAll('textarea')];
-	console.log(`Sam, ${boxes.length} box${boxes.length != 1 ? 'es' : ''}`);
-	boxes.forEach((textarea) => {
+	[...document.querySelectorAll('textarea')].forEach((textarea) => {
 		let composing = {
 			start: false,
 			is: false,
@@ -128,13 +125,13 @@ onReady(() => {
 
 		}, false);
 	})
-}])
+});
 
 function isLetter(c) {
-	return c.toLowerCase() !== c.toUpperCase()
+	return c.toLowerCase() !== c.toUpperCase();
 }
 function isNumeric(c) {
-	return isFinite(c)
+	return !isNaN(parseFloat(c)) && isFinite(c);
 }
 
 function dictStartWith(word) {
@@ -150,7 +147,5 @@ function dictStartWith(word) {
 }
 
 Array.prototype.unique = function() {
-	return this.filter((val, i) => {
-		return this.indexOf(val) === i
-	})
+	return this.filter((val, i) => this.indexOf(val) === i)
 }
