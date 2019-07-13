@@ -89,6 +89,7 @@ const plugins = require('gulp-load-plugins')({
 		},
 	},
 });
+plugins['connect.reload'] = plugins.connect.reload;
 
 const options = {
 	compileJS:{
@@ -324,14 +325,14 @@ const options = {
 			path: 'min.js'
 		}
 	},
-	webserver:{
-		path: `/${packageJson.name}/`,
-		directoryListing: false,
-		defaultFile: 'index.html',
+
+	connect: {
+		root: 'docs',
 		fallback: 'index.html',
 		livereload: true,
 		port: argv.port,
 	},
+
 	sort:{
 		css:[
 			'scss/**/*.{sa,sc,c}ss',
@@ -471,6 +472,7 @@ function runTasks(task) {
 			'stripCssComments',
 			'rmLines',
 			'prefixCSS',
+			'connect.reload',
 		],
 		fileType: 'css',
 	},
@@ -506,6 +508,7 @@ function runTasks(task) {
 		tasks: [
 			'compileJS',
 			'rmLines',
+			'connect.reload',
 		],
 		fileType: 'js',
 	},
@@ -519,6 +522,7 @@ function runTasks(task) {
 			'lintHTML',
 			'ssi',
 			'compileHTML',
+			'connect.reload',
 		],
 		fileType: 'html',
 	},
@@ -587,9 +591,9 @@ gulp.task('watch', () => {
 	gulp.watch('./src/**/*.js', gulp.series('compile:js'))
 });
 
-gulp.task('serve', () => gulp.src('./docs/')
-	.pipe(plugins.webserver(options.webserver))
-);
+gulp.task('serve', () => {
+	return plugins.connect.server(options.connect);
+});
 
 gulp.task('generate:page', gulp.series(
 	(done) => {
