@@ -52,71 +52,72 @@ onReady(() => {
 				strSearch = strSearch.substr(txtarea.selectionStart, txtarea.selectionEnd);
 			}
 
-			let re = /\b[a-z']+$/i, lastWord;
+			let re = /\b[a-z']+$/i;
+			let lastWord;
 			let end = re.exec(strSearch);
 			if (Array.isArray(end)) {
 				lastWord = end[0].toLowerCase();
 			}
 
 			switch (e.inputType) {
-				case 'insertText':
-					if (e.data.match(/\s/)) { // Whitespace
+			case 'insertText':
+				if (typeof e.data === 'string' && e.data.match(/\s/)) { // Whitespace
 
-						if (composing.is) {
-							re = new RegExp(`([a-z']+)${e.data}$`, 'i');
-								end = re.exec(strSearch);
-								if (Array.isArray(end)) {
-									lastWord = end[1].toLowerCase();
-									if (dict[lastWord] || list.length === 1) {
-										const word = list.length === 1 ? list[0] : Array.isArray(dict[lastWord]) ? dict[lastWord][0] : dict[lastWord];
-										replacement = `${word}${e.data}`;
-									}
-								}
-						}
-						composing.is = false;
-						clearCompBox();
-
-					} else if (isLetter(e.data) || e.data === "'") {
-						// TODO: Open Composition Box if unopen
-						if (!composing.is) {
-							composing.start = end.index;
-						}
-						composing.is = true;
-						updateCompBox(lastWord);
-
-					} else if (isNumeric(e.data)) {
-						if (composing.is) {
-							// Replace Text with Selected Composition Box Entry
-							const num = Number.parseInt(e.data, 10) - 1;
-							re = new RegExp(`([a-z']+)${e.data}$`, 'i');
-								end = re.exec(strSearch);
-								if (Array.isArray(end) && list[num]) {
-									replacement = `${list[num]} `;
-									composing.is = false;
-									clearCompBox();
-								}
+					if (composing.is) {
+						re = new RegExp(`([a-z']+)${e.data}$`, 'i');
+						end = re.exec(strSearch);
+						if (Array.isArray(end)) {
+							lastWord = end[1].toLowerCase();
+							if (dict[lastWord] || list.length === 1) {
+								const word = list.length === 1 ? list[0] : Array.isArray(dict[lastWord]) ? dict[lastWord][0] : dict[lastWord];
+								replacement = `${word}${e.data}`;
+							}
 						}
 					}
-					break;
-
-				case 'insertLineBreak':
 					composing.is = false;
 					clearCompBox();
-					break;
 
-				case 'deleteContentBackward':
+				} else if (typeof e.data === 'string' && (isLetter(e.data) || e.data === "'")) {
+					// TODO: Open Composition Box if unopen
+					if (!composing.is) {
+						composing.start = end.index;
+					}
+					composing.is = true;
+					updateCompBox(lastWord);
+
+				} else if (Number.isFinite(e.data)) {
 					if (composing.is) {
-						if (strSearch.length <= composing.start) {
+						// Replace Text with Selected Composition Box Entry
+						const num = Number.parseInt(e.data, 10) - 1;
+						re = new RegExp(`([a-z']+)${e.data}$`, 'i');
+						end = re.exec(strSearch);
+						if (Array.isArray(end) && list[num]) {
+							replacement = `${list[num]} `;
 							composing.is = false;
 							clearCompBox();
-						} else {
-							updateCompBox(lastWord);
 						}
 					}
-					break;
+				}
+				break;
 
-				default:
-					console.log(e);
+			case 'insertLineBreak':
+				composing.is = false;
+				clearCompBox();
+				break;
+
+			case 'deleteContentBackward':
+				if (composing.is) {
+					if (strSearch.length <= composing.start) {
+						composing.is = false;
+						clearCompBox();
+					} else {
+						updateCompBox(lastWord);
+					}
+				}
+				break;
+
+			default:
+				console.log(e);
 			}
 
 			if (typeof replacement === 'string') {
