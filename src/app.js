@@ -37,6 +37,7 @@ onReady(() => {
 			is: false,
 		};
 
+		// TODO: Can we get this to work on a touchscreen keyboard?
 		textarea.addEventListener('input', (e) => {
 			if (e.isComposing) composing.is = e.isComposing;
 
@@ -124,28 +125,27 @@ onReady(() => {
 			}
 
 		}, false);
-	})
+	});
 });
 
 function isLetter(c) {
 	return c.toLowerCase() !== c.toUpperCase();
 }
-function isNumeric(c) {
-	return !isNaN(parseFloat(c)) && isFinite(c);
-}
 
 function dictStartWith(word) {
-	word = word.toLowerCase()
-	let list = []
-	for (let i in dict) {
-		if (i.startsWith(word)) {
-			if (typeof dict[i] === 'string') list.push(dict[i])
-			if (Array.isArray(dict[i])) list = list.concat(dict[i])
+	word = word.toLowerCase();
+	const checkList = [];
+	Object.entries(dict).forEach(([i, p]) => {
+		if (!i.startsWith(word)) return;
+		if (typeof p === 'string') {
+			checkList.push(p);
+		} else if (Array.isArray(p)) {
+			checkList.push(...p);
 		}
-	}
-	return list.unique()
+	});
+	return checkList.unique();
 }
 
 Array.prototype.unique = function() {
-	return this.filter((val, i) => this.indexOf(val) === i)
+	return this.filter((val, i) => this.indexOf(val) === i);
 }
