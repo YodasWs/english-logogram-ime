@@ -61,10 +61,10 @@ onReady(() => {
 
 			switch (e.inputType) {
 			case 'insertText':
-				if (typeof e.data === 'string' && e.data.match(/\s/)) { // Whitespace
+				if (typeof e.data === 'string' && e.data.match(/[\!\?:;,'"\)\*\.\s]/)) { // Whitespace and punctuation
 
 					if (composing.is) {
-						re = new RegExp(`([a-z']+)${e.data}$`, 'i');
+						re = new RegExp(`([a-z'']+)${e.data === '?' ? '\\?' : e.data}$`, 'i');
 						end = re.exec(strSearch);
 						if (Array.isArray(end)) {
 							lastWord = end[1].toLowerCase();
@@ -85,17 +85,15 @@ onReady(() => {
 					composing.is = true;
 					updateCompBox(lastWord);
 
-				} else if (Number.isFinite(e.data)) {
-					if (composing.is) {
-						// Replace Text with Selected Composition Box Entry
-						const num = Number.parseInt(e.data, 10) - 1;
-						re = new RegExp(`([a-z']+)${e.data}$`, 'i');
-						end = re.exec(strSearch);
-						if (Array.isArray(end) && list[num]) {
-							replacement = `${list[num]} `;
-							composing.is = false;
-							clearCompBox();
-						}
+				} else if (Number.isFinite(Number.parseInt(e.data)) && composing.is) {
+					// Replace Text with Selected Composition Box Entry
+					const num = Number.parseInt(e.data, 10) - 1;
+					re = new RegExp(`([a-z'']+)${e.data}$`, 'i');
+					end = re.exec(strSearch);
+					if (Array.isArray(end) && list[num]) {
+						replacement = `${list[num]} `;
+						composing.is = false;
+						clearCompBox();
 					}
 				}
 				break;
