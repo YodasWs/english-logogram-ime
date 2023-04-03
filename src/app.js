@@ -1,150 +1,168 @@
 /* app.json */
 
+// Expand dictionary entries with HTML to display
+Object.entries(dict).forEach(([originalEnglish, logograms]) => {
+	// Convert to Array for looping
+	if (typeof logograms === 'string') {
+		logograms = [logograms];
+	}
+	dict[originalEnglish] = logograms.map((character) => {
+		// Convert to basic object
+		if (typeof character === 'string') {
+			character = {
+				logo: character,
+			};
+		}
+		return {
+			html: `<strong>${character.logo}</strong>, ${originalEnglish}`,
+			...character,
+		};
+	});
+});
+
+console.log('Sam, dict:', dict);
+
 let $list;
 let list = [];
+// TODO: Accept multiple words
+const regexLastWord = /\b[a-z']+$/i;
 
-function updateCompBox(word) {
-	clearCompBox();
-	if (! word || typeof word !== 'string') return;
-	dictStartWith(word.toLowerCase()).forEach((word) => {
-		const li = document.createElement('li');
-		li.innerHTML = word;
-		$list.appendChild(li);
-		list.push(word);
-	});
-}
-function clearCompBox() {
-	$list.innerHTML = '';
-	list = [];
-}
-
-function onReady(fn) {
-	let c = false;
+(function onReady(fn) {
+	let readied = false;
 	document.addEventListener('readystatechange', (e) => {
-		if (c) return;
+		if (readied) return;
 		if (['interactive', 'complete'].includes(document.readyState)) {
-			c = true;
+			readied = true;
 			fn(e);
 		}
 	});
-}
-
-onReady(() => {
+})(() => {
 	$list = document.querySelector('#composition');
 	[...document.querySelectorAll('textarea')].forEach((textarea) => {
-		let composing = {
-			start: false,
-			is: false,
+		const composing = {
+			// Keep track of where the current composition text starts
+			// TODO: Update to cursor/selectionEnd when the cursor/selection is moved
+			start: 0,
 		};
 
 		// TODO: Can we get this to work on a touchscreen keyboard?
 		textarea.addEventListener('input', (e) => {
-			if (e.isComposing) composing.is = e.isComposing;
-
 			const txtarea = e.target;
 
-			let strSearch = txtarea.value;
 			let replacement = null;
 
+			// First, get the English string in which we will be making our replacement
+			let strSearch = txtarea.value;
 			if (txtarea.selectionStart === txtarea.selectionEnd) {
-				strSearch = strSearch.substr(0, txtarea.selectionEnd);
+				strSearch = strSearch.substr(composing.start, txtarea.selectionEnd);
 			} else {
 				strSearch = strSearch.substr(txtarea.selectionStart, txtarea.selectionEnd);
 			}
 
-			let re = /\b[a-z']+$/i;
-			let lastWord;
-			let end = re.exec(strSearch);
-			if (Array.isArray(end)) {
-				lastWord = end[0].toLowerCase();
-			}
-
+			// Check inputType
 			switch (e.inputType) {
 			case 'insertText':
-				if (typeof e.data === 'string' && e.data.match(/[\!\?:;,'"\)\*\.\s]/)) { // Whitespace and punctuation
-
-					if (composing.is) {
-						re = new RegExp(`([a-z'']+)${e.data === '?' ? '\\?' : e.data}$`, 'i');
-						end = re.exec(strSearch);
-						if (Array.isArray(end)) {
-							lastWord = end[1].toLowerCase();
-							if (dict[lastWord] || list.length === 1) {
-								const word = list.length === 1 ? list[0] : Array.isArray(dict[lastWord]) ? dict[lastWord][0] : dict[lastWord];
-								replacement = `${word}${e.data}`;
-							}
-						}
+				if (!(typeof e.data === 'string')) {
+					break;
+				}
+				// Whitespace and punctuation, replace English
+				if (e.data.match(/[\!\?:;,'"\)\*\.\s]/)) {
+					// Grab composition entered, not including last character
+					const composition = new RegExp(`(.+)${e.data === '?' ? '\\?' : e.data}$`, 'i').exec(strSearch);
+					const lastWord = Array.isArray(composition) && composition.length > 1 ? composition[1].toLowerCase() : null;
+					// If exact match or only one choice, use the match for replacement
+					if (dict[lastWord] || list.length === 1) {
+						const word = list.length === 1 ? list[0] : dict[lastWord][0];
+						// Grab replacement text
+						replacement = `${word.logo}${e.data}`;
+						break;
 					}
-					composing.is = false;
-					clearCompBox();
 
-				} else if (typeof e.data === 'string' && (isLetter(e.data) || e.data === "'")) {
-					// TODO: Open Composition Box if unopen
-					if (!composing.is) {
-						composing.start = end.index;
+					// Continuing the composition
+					updateCompositionBox(strSearch);
+
+					// If no results, we're starting a new composition
+					if (list.length === 0) {
+						composing.start = txtarea.selectionEnd;
+						console.log('Sam, no results, composing.start:', composing.start);
+						break;
 					}
-					composing.is = true;
-					updateCompBox(lastWord);
-
-				} else if (Number.isFinite(Number.parseInt(e.data)) && composing.is) {
+				} else if (isLetter(e.data)) {
+					// Now update composition box
+					updateCompositionBox(strSearch);
+				} else if (Number.isFinite(Number.parseInt(e.data))) {
 					// Replace Text with Selected Composition Box Entry
-					const num = Number.parseInt(e.data, 10) - 1;
-					re = new RegExp(`([a-z'']+)${e.data}$`, 'i');
-					end = re.exec(strSearch);
-					if (Array.isArray(end) && list[num]) {
-						replacement = `${list[num]} `;
-						composing.is = false;
-						clearCompBox();
+					const composition = new RegExp(`(.+)${e.data === '?' ? '\\?' : e.data}$`, 'i').exec(strSearch);
+					if (Array.isArray(composition) && composition.length > 1) {
+						replacement = list[Number.parseInt(e.data) - 1].logo;
+						break;
 					}
 				}
-				break;
-
-			case 'insertLineBreak':
-				composing.is = false;
-				clearCompBox();
 				break;
 
 			case 'deleteContentBackward':
-				if (composing.is) {
-					if (strSearch.length <= composing.start) {
-						composing.is = false;
-						clearCompBox();
-					} else {
-						updateCompBox(lastWord);
-					}
-				}
+				// User hit backspace, update composition box
+					console.log('Sam, composing.start:', composing.start);
+				composing.start = Math.min(composing.start, txtarea.selectionEnd);
+					console.log('Sam, composing.start:', composing.start);
+				updateCompositionBox(strSearch);
+				break;
+
+			case 'deleteWordBackward':
+				// Deleted last word, update composition box
+				composing.start = Math.min(composing.start, txtarea.selectionEnd);
+				updateCompositionBox(strSearch);
+				break;
+
+			case 'insertLineBreak':
+				// Moved to next line, clear box and do not replace text
+				composing.start = txtarea.selectionEnd;
+				clearCompositionBox();
 				break;
 
 			default:
 				console.log(e);
 			}
 
+			// Now replace text in textarea
 			if (typeof replacement === 'string') {
 				txtarea.value = txtarea.value.substr(0, composing.start) + replacement + txtarea.value.substr(txtarea.selectionEnd);
 				txtarea.setSelectionRange(composing.start + replacement.length, composing.start + replacement.length);
+				// Mark start of next composition
+				composing.start = txtarea.selectionEnd;
+				clearCompositionBox();
 			}
-
-		}, false);
+		});
 	});
 });
 
-function isLetter(c) {
-	return c.toLowerCase() !== c.toUpperCase();
-}
-
+// Find all entries in dictionary starting with `word`
 function dictStartWith(word) {
 	word = word.toLowerCase();
 	const checkList = [];
-	Object.entries(dict).forEach(([i, p]) => {
-		if (!i.startsWith(word)) return;
-		if (typeof p === 'string') {
-			checkList.push(p);
-		} else if (Array.isArray(p)) {
-			checkList.push(...p);
-		}
+	Object.entries(dict).forEach(([originalEnglish, logograms]) => {
+		if (!originalEnglish.startsWith(word)) return;
+		checkList.push(...logograms);
 	});
-	return checkList.unique();
+	return checkList;
 }
 
-Array.prototype.unique = function() {
-	return this.filter((val, i) => this.indexOf(val) === i);
+function clearCompositionBox() {
+	$list.innerHTML = '';
+	list = [];
+}
+
+function updateCompositionBox(word) {
+	clearCompositionBox();
+	if (!word || typeof word !== 'string') return;
+	dictStartWith(word.toLowerCase()).forEach((word) => {
+		const li = document.createElement('li');
+		$list.appendChild(li);
+		li.innerHTML = word.html;
+		list.push(word);
+	});
+}
+
+function isLetter(c) {
+	return c.toLowerCase() !== c.toUpperCase();
 }
