@@ -29,6 +29,8 @@ Object.entries(dict).forEach(([originalEnglish, logograms]) => {
 					return '5th grade';
 				case 'kyoiku-kanji-6.json':
 					return '6th grade';
+				case 'silent-e.json':
+					return 'remove magic e';
 				default:
 					return file;
 			}

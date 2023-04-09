@@ -3,6 +3,13 @@
 	"mabe": "maıb",
 	"rabe": "raıb",
 
+	"ace": "aıs",
+	"face": "faıs",
+	"lace": "laıs",
+	"mace": "maıs",
+	"pace": "paıs",
+	"race": "raıs",
+
 	"bane": "baın",
 	"cane": "caın",
 	"dane": "daın",
@@ -26,5 +33,10 @@
 	"rare": "raır",
 	"tare": "taır",
 	"vare": "vaır",
-	"ware": "waır"
+	"ware": "waır",
+
+	"base": "baıs",
+	"case": "caıs",
+	"lase": "laıs",
+	"vase": "vaıs"
 }
