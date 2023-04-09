@@ -8,13 +8,27 @@ main {
 		}
 	}
 
-	ul#composition {
+	ol#composition {
 		display: block;
 		margin: 0;
 		width: 50%;
 		min-width: 200px;
 		max-width: 500px;
 		min-height: 1em;
-		border: 1px inset dimgrey;
+
+		small {
+			font-size: x-small;
+			vertical-align: middle;
+
+			&::before {
+				display: inline;
+				content: "(";
+			}
+
+			&::after {
+				display: inline;
+				content: ")";
+			}
+		}
 	}
 }

@@ -354,7 +354,24 @@ const options = {
 					requires += '\nlet dict = {}';
 					site.dict.forEach((file, i) => {	
 						fs.accessSync(`./src/dictionary/${file}`);
-						requires += `\nObject.assign(dict, require('../src/dictionary/${file}'))`;
+						requires += `\nObject.assign(dict, Object.entries(require('../src/dictionary/${file}')).reduce((obj, [originalEnglish, logograms]) => {
+							if (typeof logograms === 'string') {
+								logograms = [logograms];
+							}
+							obj[originalEnglish] = logograms.map((character) => {
+								// Convert to basic object
+								if (typeof character === 'string') {
+									character = {
+										logo: character,
+									};
+								}
+								return {
+									file: '${file}',
+									...character,
+								};
+							});
+							return obj;
+						}, {}));`;
 					});
 				}
 

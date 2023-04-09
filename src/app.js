@@ -13,8 +13,31 @@ Object.entries(dict).forEach(([originalEnglish, logograms]) => {
 				logo: character,
 			};
 		}
+		const section = ((file) => {
+			switch (file) {
+				case 'pronouns.json':
+					return 'pronoun';
+				case 'kyoiku-kanji-1.json':
+					return '1st grade';
+				case 'kyoiku-kanji-2.json':
+					return '2nd grade';
+				case 'kyoiku-kanji-3.json':
+					return '3rd grade';
+				case 'kyoiku-kanji-4.json':
+					return '4th grade';
+				case 'kyoiku-kanji-5.json':
+					return '5th grade';
+				case 'kyoiku-kanji-6.json':
+					return '6th grade';
+				default:
+					return file;
+			}
+		})(character.file);
 		return {
-			html: `<strong>${character.logo}</strong>, ${originalEnglish}`,
+			html: `<strong>${character.logo}</strong>, ${originalEnglish}${
+				typeof section === 'string' ? ` <small>${section}</small>` : ''
+			}`,
+			section,
 			...character,
 		};
 	});
