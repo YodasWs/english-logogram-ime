@@ -7,6 +7,8 @@
 		"kyoiku-kanji-3.json",
 		"kyoiku-kanji-4.json",
 		"silent-e.json",
-		"prefix-to.json"
+		"prefix-to.json",
+		"sh.json",
+		"th.json"
 	]
 }

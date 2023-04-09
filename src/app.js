@@ -31,6 +31,10 @@ Object.entries(dict).forEach(([originalEnglish, logograms]) => {
 					return '6th grade';
 				case 'silent-e.json':
 					return 'remove magic e';
+				case 'sh.json':
+					return 'Ʃ/ʃ';
+				case 'th.json':
+					return 'Ð/ð';
 				default:
 					return file;
 			}
