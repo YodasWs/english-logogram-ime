@@ -68,8 +68,16 @@ const regexLastWord = /\b[a-z']+$/i;
 			start: 0,
 		};
 
+		textarea.addEventListener('keydown', (e) => {
+			if (e.key === 'ArrowRight') {
+				composing.start = e.target.selectionEnd;
+				clearCompositionBox();
+			}
+		});
+
 		// TODO: Can we get this to work on a touchscreen keyboard?
 		textarea.addEventListener('input', (e) => {
+
 			const txtarea = e.target;
 
 			let replacement = null;
