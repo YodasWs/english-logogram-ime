@@ -87,9 +87,9 @@ const regexLastWord = /\b[a-z']+$/i;
 			// First, get the English string in which we will be making our replacement
 			let strSearch = txtarea.value;
 			if (txtarea.selectionStart === txtarea.selectionEnd) {
-				strSearch = strSearch.substr(composing.start, txtarea.selectionEnd);
+				strSearch = strSearch.substring(composing.start, txtarea.selectionEnd);
 			} else {
-				strSearch = strSearch.substr(txtarea.selectionStart, txtarea.selectionEnd);
+				strSearch = strSearch.substring(txtarea.selectionStart, txtarea.selectionEnd);
 			}
 
 			// Check inputType
@@ -159,7 +159,7 @@ const regexLastWord = /\b[a-z']+$/i;
 
 			// Now replace text in textarea
 			if (typeof replacement === 'string') {
-				txtarea.value = txtarea.value.substr(0, composing.start) + replacement + txtarea.value.substr(txtarea.selectionEnd);
+				txtarea.value = txtarea.value.substring(0, composing.start) + replacement + txtarea.value.substring(txtarea.selectionEnd);
 				txtarea.setSelectionRange(composing.start + replacement.length, composing.start + replacement.length);
 				// Mark start of next composition
 				composing.start = txtarea.selectionEnd;
